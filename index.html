@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QR code ad</title>
+        <script
+            src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/dotenv@16.4.5/lib/main.min.js"></script>
+        <script async src="./qr-code-ai.js"></script>
+        <style>
+    body {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(180deg, rgb(180, 177, 241) 0%, rgb(255, 255, 255) 100%);
+        background-position: top;
+        backdrop-filter: blur(50px);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+.fade-in {
+  animation: fadeInAnimation 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeInAnimation {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.qr-code {
+  transition: transform 0.5s ease-in-out;
+}
+
+.qr-code:hover {
+  transform: scale(1.05);
+}
+
+</style>
+    </head>
+    <body>
+        <div
+            class="flex flex-col m-auto w-full justify-center gap-6 items-center">
+            <h4 id="catchphrase" class="m-auto text-black"
+                style="text-align: center;font-weight:bold;font-size: 3rem">
+                Text </h4>
+            <div
+                class="flex justify-center items-center border-4 rounded-md border-indigo-500">
+                <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://www.youtube.com/watch?v=3X9e3f3lY1A"
+                    alt="QR code" />
+            </div>
+            <button
+                class="m-auto bg-indigo-500 text-white font-bold py-2 px-4 rounded"
+                onclick="generatePhrase()">
+                Generate new text
+            </button>
+        </div>
+    </body>
+</html>
