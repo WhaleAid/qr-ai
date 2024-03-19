@@ -1,0 +1,12 @@
+{
+    "orientation": "portrait",
+    "fields": [
+        {
+            "id": "catchPhrase",
+            "label": "Catch Phrase",
+            "default": "Ceci est un texte généré par une Intelligence Artificielle",
+            "mandatory": true,
+            "maxLength": 300
+        }
+    ]
+}

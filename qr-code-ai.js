@@ -1,32 +1,23 @@
 (function () {
   document.head.insertAdjacentHTML('beforeend', '<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.16/tailwind.min.css" rel="stylesheet">');
 
+  // get the string from the backend.link.txt text file and store it in a variable called backendLink
+  let backendLink;
+  fetch('backend.link.txt')
+    .then(response => response.text())
+    .then(data => {
+      backendLink = data;
+    });
+
   window.generatePhrase = function () {
-    let url = "https://api.openai.com/v1/chat/completions";
-    let OPENAI_API_KEY = "YOUR_API_KEY";
+    let url = `${backendLink}/generate-completion`;
 
     let headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`
     };
 
     let body = {
-      "model": "gpt-3.5-turbo",
-      "messages": [
-        {
-          "role": "system",
-          "content": "You are simply a catchphrase generator, you'll be told what product to talk about and you generate a simple but catchy catchphrase in 1 or 2 sentences```The phrase you generate must be in french```."
-        },
-        {
-          "role": "user",
-          "content": "Generate a catchphrase for a new coffe machine."
-        }
-      ],
-      "temperature": 1,
-      "max_tokens": 256,
-      "top_p": 1,
-      "frequency_penalty": 0,
-      "presence_penalty": 0
+      "prompt": "A catchphrase for a QR code that links to the website of google."
     };
     fetch(url, {
       method: 'POST',
@@ -35,10 +26,11 @@
     })
       .then(response => response.json())
       .then(data => {
-        let phrase = data['choices'][0]['message']['content'];
+        let { phrase, generationId } = data;
+        generateColors(generationId)
         phrase = phrase.replace(/['"]+/g, '');
         changeText(phrase);
-        updateQRCode(phrase);
+        updateQRCode(generationId);
       })
       .catch(error => {
         console.error('Error:', error);
@@ -46,25 +38,107 @@
       });
   };
 
+  function generateColors(generationId) {
+    let url = `${backendLink}/generate-colors/${generationId}`;
+    const imageLink = document.getElementById('logo').src
+    let dominantColor
+    colorjs.prominent(imageLink, { amount: 3, format: 'hex' }).then((colors) => {
+      let headers = {
+        "Content-Type": "application/json",
+      };
+
+      let body = {
+        "colors": colors,
+        "prompt": `generate an array of hex colors inspired by these colors ${colors}`
+      }
+
+      fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      })
+        .then(response => response.json())
+        .then(data => {
+          let colors = data;
+          updateColors(colors);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('catchphrase').innerText = "Error fetching data";
+        });
+    })
+  }
+
   function changeText(text) {
     const catchphraseElement = document.getElementById('catchphrase');
     gsap.to(catchphraseElement, {
-      duration: 0.25, opacity: 0, onComplete: () => {
+      duration: 0.25, onComplete: () => {
         catchphraseElement.innerText = text;
-        gsap.to(catchphraseElement, { duration: 0.25, opacity: 1 });
+        gsap.to(catchphraseElement, { duration: 0.25 });
       }
     });
   }
 
-  function updateQRCode(data) {
-    const qrImage = document.querySelector('img[alt="QR code"]');
-    const newSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data)}`;
-    gsap.to(qrImage, {
+  function updateQRCode(generationId) {
+    const qrImageContainer = document.querySelector('#qr-code-container');
+    qrImageContainer.innerHTML = '';
+    const apiUrl = `${backendLink}/scan/${generationId}`
+    const redirectUrl = 'https://www.google.com'
+    const fullUrl = `${apiUrl}?redirectUrl=${encodeURIComponent(redirectUrl)}`;
+
+    let qr = qrcode(8, 'M')
+    qr.addData(fullUrl);
+    qr.make();
+    gsap.to(qrImageContainer, {
       duration: 0.25, opacity: 0, onComplete: () => {
-        qrImage.src = newSrc;
-        gsap.to(qrImage, { duration: 0.25, opacity: 1 });
+        qrImageContainer.innerHTML = qr.createImgTag();
+        gsap.to(qrImageContainer, { duration: 0.25, opacity: 1 });
       }
     });
+  }
+
+  function updateColors(colors) {
+    const colorsArray = JSON.parse(colors);
+    const canvas = document.querySelectorAll('.gradients-container');
+    const button = document.getElementById('generate-button');
+    const qrImageContainer = document.querySelector('#qr-code-container');
+    const catchphraseElement = document.getElementById('catchphrase')
+
+    gsap.to(canvas, {
+      duration: 0.25, onComplete: () => {
+        document.documentElement.style.setProperty('--color-bg1', colorsArray[1].replace(/['"]+/g, ''));
+        document.documentElement.style.setProperty('--color-bg2', colorsArray[2].replace(/['"]+/g, ''));
+        document.documentElement.style.setProperty('--color1', colorsArray[3].replace(/['"]+/g, ''));
+        document.documentElement.style.setProperty('--color2', colorsArray[4].replace(/['"]+/g, ''));
+        gsap.to(canvas, { duration: 0.25 })
+      }
+    })
+    const randomIndex = Math.floor(Math.random() * colorsArray.length)
+    gsap.to(qrImageContainer, {
+      duration: 0.25, opacity: 0, onComplete: () => {
+        qrImageContainer.style.borderColor = colorsArray[
+          randomIndex
+        ].replace(/['"]+/g, '');
+        gsap.to(qrImageContainer, { duration: 0.25, opacity: 1 })
+      }
+    })
+
+    gsap.to(button, {
+      duration: 0.25, onComplete: () => {
+        button.style.backgroundColor = colorsArray[
+          randomIndex === 0 ? 1 : randomIndex
+        ].replace(/['"]+/g, '');
+        button.style.color = colorsArray[0].replace(/['"]+/g, '');
+        gsap.to(button, { duration: 0.25 })
+      }
+    })
+
+    gsap.to(catchphraseElement, {
+      duration: 0.25, opacity: 0, onComplete: () => {
+        catchphraseElement.style.color = colorsArray[0].replace(/['"]+/g, '');
+        gsap.to(catchphraseElement, { duration: 0.25, opacity: 1 })
+      }
+    })
   }
 
 })();

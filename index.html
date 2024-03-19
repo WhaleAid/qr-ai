@@ -4,59 +4,59 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="./style.css">
         <title>QR code ad</title>
         <script
             src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
         <script
-            src="https://cdn.jsdelivr.net/npm/dotenv@16.4.5/lib/main.min.js"></script>
-        <script async src="./qr-code-ai.js"></script>
-        <style>
-    body {
-        height: 100vh;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        background: linear-gradient(180deg, rgb(180, 177, 241) 0%, rgb(255, 255, 255) 100%);
-        background-position: top;
-        backdrop-filter: blur(50px);
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-.fade-in {
-  animation: fadeInAnimation 0.5s ease-in-out forwards;
-}
-
-@keyframes fadeInAnimation {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.qr-code {
-  transition: transform 0.5s ease-in-out;
-}
-
-.qr-code:hover {
-  transform: scale(1.05);
-}
-
-</style>
+            src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"
+            integrity="sha512-ZDSPMa/JM1D+7kdg2x3BsruQ6T/JpJo3jWDWkCZsP+5yVyp1KfESqLI+7RqB5k24F7p2cV7i2YHh/890y6P6Sw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script type="module" async src="./qr-code-ai.js"></script>
+        <script src="https://unpkg.com/color.js@1.2.0/dist/color.js"></script>
     </head>
-    <body>
+    <body id="body" data-transition-in>
+        <div class="gradient-bg h-full min-h-screen">
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="goo">
+                        <fegaussianblur in="SourceGraphic" stdDeviation="10"
+                            result="blur" />
+                        <fecolormatrix in="blur" mode="matrix"
+                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
+                            result="goo" />
+                        <feblend in="SourceGraphic" in2="goo" />
+                    </filter>
+                </defs>
+            </svg>
+            <div class="gradients-container">
+                <div class="g1"></div>
+                <div class="g2"></div>
+                <div class="g3"></div>
+                <div class="g4"></div>
+                <div class="g5"></div>
+            </div>
+        </div>
         <div
-            class="flex flex-col m-auto w-full justify-center gap-6 items-center">
-            <h4 id="catchphrase" class="m-auto text-black"
-                style="text-align: center;font-weight:bold;font-size: 3rem">
+            class="flex flex-col m-auto w-[40%] h-full justify-center gap-6 items-center md:text-6xl text-4xl z-2">
+            <div class="object-cover" style="width: 30%; min-width: 200px; max-width: 300px;">
+                <img id="logo" class="w-full h-full" src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" alt=""logo>
+            </div>
+            <h4 id="catchphrase" class="p-4 rounded-md"
+                style="text-align: center;font-weight:bold; text-shadow: 1px 1px 2px black; font-size: 2rem;">
                 Text </h4>
             <div
+                id="qr-code-container"
                 class="flex justify-center items-center border-4 rounded-md border-indigo-500">
                 <img
                     src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://www.youtube.com/watch?v=3X9e3f3lY1A"
                     alt="QR code" />
             </div>
             <button
-                class="m-auto bg-indigo-500 text-white font-bold py-2 px-4 rounded"
+                id="generate-button"
+                class="bg-indigo-500 text-white font-bold py-2 px-4 rounded text-xl cursor-pointer"
                 onclick="generatePhrase()">
                 Generate new text
             </button>
